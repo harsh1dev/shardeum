@@ -39,7 +39,7 @@ import {
 import { fixBigIntLiteralsToBigInt } from '../utils/serialization'
 import { validatePenaltyTX } from '../tx/penalty/transaction'
 import { bytesToHex } from '@ethereumjs/util'
-import { logFlags, shardusConfig } from '..'
+import { logFlags, shardusConfig, getStakeTxBlobFromEVMTx } from '..'
 import { Sign } from '@shardus/core/dist/shardus/shardus-types'
 
 /**
@@ -342,6 +342,8 @@ export const validateTxnFields =
 
         if (appData && appData.internalTx && appData.internalTXType === InternalTXType.Stake) {
           if (ShardeumFlags.VerboseLogs) console.log('Validating stake coins tx fields', appData)
+          appData.internalTx = getStakeTxBlobFromEVMTx(transaction)
+          appData.internalTx.stake = BigInt(appData.internalTx.stake)
           const stakeCoinsTx = appData.internalTx as StakeCoinsTX
           const networkAccount = appData.networkAccount as NetworkAccount
           const minStakeAmountUsd = networkAccount.current.stakeRequiredUsd
