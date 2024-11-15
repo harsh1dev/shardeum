@@ -12,9 +12,10 @@ import * as AccountsStorage from '../../storage/accountStorage'
 import { _base16BNParser, scaleByStabilityFactor } from '../../utils'
 import { Address } from '@ethereumjs/util'
 import { networkAccount as globalAccount } from '../../shardeum/shardeumConstants'
-import { logFlags } from '../..'
+import { logFlags, shardusConfig } from '../..'
 import { toShardusAddress } from '../../shardeum/evmAddress'
 import { nestedCountersInstance, Shardus } from '@shardus/core'
+import * as TicketManager from "../../setup/ticket-manager"
 
 export function verifyStakeTx(
   appData: any,
@@ -33,6 +34,47 @@ export function verifyStakeTx(
   const minStakeAmount = scaleByStabilityFactor(minStakeAmountUsd, networkAccount)
   const nomineeAccount = wrappedStates[stakeCoinsTx.nominee].data as NodeAccount2
   if (typeof stakeCoinsTx.stake === 'object') stakeCoinsTx.stake = BigInt(stakeCoinsTx.stake)
+
+  /* prettier-ignore */ if (logFlags.debug) console.log(`[verifyStake][verifyStakeTx] shardusConfig: ${JSON.stringify(shardusConfig)}`)
+  // Check if Silver Tickets feature is enabled in the shardus configuration
+  const ticketTypes = shardusConfig?.features?.tickets?.ticketTypes
+  /* prettier-ignore */ if (logFlags.debug) console.log(`[verifyStake][verifyStakeTx] ticketTypes: ${JSON.stringify(ticketTypes)}`)
+  const isSilverTicketsEnabled = ticketTypes?.find((tt) => tt.type === TicketManager.TicketTypes.SILVER)?.enabled
+  /* prettier-ignore */ if (logFlags.debug) console.log(`[verifyStake][verifyStakeTx] isSilverTicketsEnabled: ${isSilverTicketsEnabled}`)
+  if (isSilverTicketsEnabled) {
+    let silverTicketForNominee: TicketManager.Ticket | undefined;
+    // Retrieve all Silver Tickets using the TicketManager
+    const silverTickets: TicketManager.Ticket[] = TicketManager.getTicketsByType(TicketManager.TicketTypes.SILVER);
+    /* prettier-ignore */ if (logFlags.debug) console.log(`[verifyStake][verifyStakeTx] silverTickets: ${JSON.stringify(silverTickets)}`)
+    if (silverTickets.length > 0) {
+      const operatorShardusAddress = toShardusAddress(stakeCoinsTx.nominator, AccountType.Account)
+      /* prettier-ignore */ if (logFlags.debug) console.log(`[verifyStake][verifyStakeTx] nominee: ${stakeCoinsTx?.nominee}, operatorShardusAddress: ${operatorShardusAddress}, senderAddress: ${senderAddress}`)
+      // Look for a Silver Ticket that matches the nominee's address (case-insensitive comparison)
+      silverTicketForNominee = silverTickets.find((ticket) => {
+        try {
+          return senderAddress.equals(Address.fromString(ticket.address))
+        } catch (e){
+          console.error(`[verifyStake][verifyStakeTx] Error while checking silver ticket address ${ticket.address}`, e)
+        }
+        return false
+      });
+      /* prettier-ignore */ if (logFlags.debug) console.log(`[verifyStake][verifyStakeTx] silverTicketForNominee: ${JSON.stringify(silverTicketForNominee)}`)
+      // If no matching Silver Ticket is found for the nominee, return a failure response
+      if (!silverTicketForNominee) {
+        return {
+          success: false,
+          reason: 'Nominee does not have a Silver Ticket',
+        };
+      }
+    } else {
+      // If no Silver Tickets are found at all, return a failure response
+      return {
+        success: false,
+        reason: 'No Silver Tickets found',
+      };
+    }
+  }
+
   if (stakeCoinsTx.nominator == null || stakeCoinsTx.nominator.toLowerCase() !== senderAddress.toString()) {
     /* prettier-ignore */ if (logFlags.dapp_verbose) console.log(`nominator vs tx signer`, stakeCoinsTx.nominator, senderAddress.toString())
     success = false

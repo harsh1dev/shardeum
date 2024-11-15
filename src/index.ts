@@ -180,6 +180,7 @@ import {
   verify as verifyTransferFromSecureAccount,
   secureAccountDataMap 
 } from './shardeum/secureAccounts'
+import * as TicketManager from './setup/ticket-manager'
 
 let latestBlock = 0
 export const blocks: BlockMap = {}
@@ -212,6 +213,7 @@ export let logFlags = {
   important_as_fatal: true,
   shardedCache: false,
   aalg: false,
+  debug: false
 }
 
 // Read the CLI and GUI versions and save them in memory
@@ -7993,6 +7995,9 @@ export function shardeumGetTime(): number {
     AccountsStorage.setAccount(networkAccount, await AccountsStorage.getAccount(networkAccount))
   shardusSetup()
   config.server = shardus.config //possibly set the server config to match the merged one?
+
+  /** Start process for updating tickets (e.g. silver) */
+  TicketManager.updateTicketMapAndScheduleNextUpdate()
 
   if (ShardeumFlags.GlobalNetworkAccount) {
     // CODE THAT GETS EXECUTED WHEN NODES START
