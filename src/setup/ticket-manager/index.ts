@@ -91,6 +91,7 @@ function scheduleUpdateTicketMap(): void {
   /* prettier-ignore */ if (logFlags.debug) console.log(JSON.stringify({script: 'tickets',method: 'scheduleUpdateTicketMap',data: { delayInMs },}))
   setTimeout(async () => {
     await updateTicketMap()
+    scheduleUpdateTicketMap()
   }, delayInMs)
 }
 
