@@ -37,7 +37,7 @@ export function verifyStakeTx(
 
   /* prettier-ignore */ if (logFlags.debug) console.log(`[verifyStake][verifyStakeTx] shardusConfig: ${JSON.stringify(shardusConfig)}`)
   // Check if Silver Tickets feature is enabled in the shardus configuration
-  const ticketTypes = shardusConfig?.features?.tickets?.ticketTypes
+  const ticketTypes = shardusConfig?.features?.tickets?.ticketTypes || []
   /* prettier-ignore */ if (logFlags.debug) console.log(`[verifyStake][verifyStakeTx] ticketTypes: ${JSON.stringify(ticketTypes)}`)
   const isSilverTicketsEnabled = ticketTypes?.find((tt) => tt.type === TicketManager.TicketTypes.SILVER)?.enabled
   /* prettier-ignore */ if (logFlags.debug) console.log(`[verifyStake][verifyStakeTx] isSilverTicketsEnabled: ${isSilverTicketsEnabled}`)

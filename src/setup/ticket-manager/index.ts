@@ -31,6 +31,14 @@ export function updateTicketMapAndScheduleNextUpdate(): void {
   })
 }
 
+function scheduleUpdateTicketMap(): void {
+  const delayInMs = config.server.features.tickets.updateTicketListTimeInMs || config.server.p2p.cycleDuration * 1000
+  /* prettier-ignore */ if (logFlags.debug) console.log(JSON.stringify({script: 'tickets',method: 'scheduleUpdateTicketMap',data: { delayInMs },}))
+  setTimeout(() => {
+    updateTicketMapAndScheduleNextUpdate()
+  }, delayInMs)
+}
+
 function getArchiverToRetrieveTicketType(): Archiver {
   const archiverList = getFinalArchiverList()
   if (archiverList.length > 0) {
@@ -40,18 +48,16 @@ function getArchiverToRetrieveTicketType(): Archiver {
 }
 
 async function getTicketTypesFromArchiver(archiver: Archiver): Promise<TicketType[]> {
-  // try {
-  //   const url = `http://${archiver.ip}:${archiver.port}/tickets`
-  //   const res = await axios.get(url)
-  //   if (res.status >= 200 && res.status < 300) {
-  //     return res.data
-  //   }
-  // } catch (error){
-  //   console.error(`[tickets][getTicketTypesFromArchiver] Error getting ticket list`, error)
-  // }
-  // return []
-
-  return [{"type":"silver","data":[{"address": "0xd79eFA2f9bB9C780e4Ce05D6b8a15541915e4636"}],"sign": [{"owner": "0x1e5e12568b7103E8B22cd680A6fa6256DD66ED76","sig": "0xf3e7f8ccc763a8b832ad933b35bb181962d9d94316407e49142cd182d090559d66904856ea2811d44ee11c000678cf9d10134636cd8e4aaa26e78baca19a896f1c"}]}]
+  try {
+    const url = `http://${archiver.ip}:${archiver.port}/tickets`
+    const res = await axios.get(url)
+    if (res.status >= 200 && res.status < 300) {
+      return res.data
+    }
+  } catch (error){
+    console.error(`[tickets][getTicketTypesFromArchiver] Error getting ticket list`, error)
+  }
+  return []
 }
 
 export async function updateTicketMap(): Promise<void> {
@@ -84,15 +90,6 @@ export async function updateTicketMap(): Promise<void> {
   } else {
     console.warn(`[tickets][updateTicketMap] No archivers found`)
   }
-}
-
-function scheduleUpdateTicketMap(): void {
-  const delayInMs = config.server.features.tickets.updateTicketListTimeInMs || config.server.p2p.cycleDuration * 1000
-  /* prettier-ignore */ if (logFlags.debug) console.log(JSON.stringify({script: 'tickets',method: 'scheduleUpdateTicketMap',data: { delayInMs },}))
-  setTimeout(async () => {
-    await updateTicketMap()
-    scheduleUpdateTicketMap()
-  }, delayInMs)
 }
 
 export function getTicketsByType(type: string): Ticket[] {
