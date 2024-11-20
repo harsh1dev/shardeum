@@ -311,7 +311,7 @@ config = merge(config, {
       archiverDataSubscriptionsUpdate: true,
       startInServiceMode: ShardeumFlags.startInServiceMode,
       tickets: {
-        updateTicketListTimeInMs: 10000,
+        updateTicketListTimeInMs: 600000,
         ticketTypes: [
           { type: 'silver', enabled: true }
         ]
