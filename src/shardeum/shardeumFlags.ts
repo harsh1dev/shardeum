@@ -122,6 +122,7 @@ interface ShardeumFlags {
   failedStakeReceipt: boolean // For stake/unstake TXs that fail the checks in apply(), create an EVM receipt marked as failed
   debugDefaultBalance: string
   disableSmartContractEndpoints: boolean
+  ticketTypesEnabled: boolean
 }
 
 export const ShardeumFlags: ShardeumFlags = {
@@ -129,12 +130,12 @@ export const ShardeumFlags: ShardeumFlags = {
   contractStoragePrefixBitLength: 3,
   contractCodeKeySilo: false,
   globalCodeBytes: false,
-  VerboseLogs: false,
+  VerboseLogs: true,
   debugTraceLogs: false,
   Virtual0Address: true,
   GlobalNetworkAccount: true,
   FirstNodeRewardCycle: 100,
-  blockProductionRate: 6,
+  blockProductionRate: 3,
   initialBlockNumber: 0,
   maxNumberOfOldBlocks: 256,
   SelfTest: false,
@@ -144,7 +145,7 @@ export const ShardeumFlags: ShardeumFlags = {
   DebugRestoreArchiveBatch: 2000,
   CheckNonce: true,
   txNoncePreCheck: false,
-  txBalancePreCheck: true,
+  txBalancePreCheck: false,
   autoGenerateAccessList: true,
   forwardGenesisAccounts: true,
   UseDBForAccounts: true,
@@ -177,7 +178,7 @@ export const ShardeumFlags: ShardeumFlags = {
     ['tx/:hash']: 5,
   },
   generateMemoryPatternData: true,
-  StakingEnabled: true,
+  StakingEnabled: false,
   ModeEnabled: true,
   AdminCertEnabled: false,
   minActiveNodesForStaking: 5,
@@ -280,6 +281,7 @@ export const ShardeumFlags: ShardeumFlags = {
   failedStakeReceipt: true,
   debugDefaultBalance: '100', //In debug mode the default value is 100 SHM.  This is needed for certain load test operations
   disableSmartContractEndpoints: true, // Disable smart contract read endpoints by default
+  ticketTypesEnabled: true,
 }
 
 export function updateShardeumFlag(key: string, value: string | number | boolean): void {
