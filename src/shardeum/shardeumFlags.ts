@@ -281,7 +281,7 @@ export const ShardeumFlags: ShardeumFlags = {
   failedStakeReceipt: true,
   debugDefaultBalance: '100', //In debug mode the default value is 100 SHM.  This is needed for certain load test operations
   disableSmartContractEndpoints: true, // Disable smart contract read endpoints by default
-  ticketTypesEnabled: true,
+  ticketTypesEnabled: false,
 }
 
 export function updateShardeumFlag(key: string, value: string | number | boolean): void {
